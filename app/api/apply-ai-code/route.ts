@@ -3,6 +3,7 @@ import { parseMorphEdits, applyMorphEditToFile } from '@/lib/morph-fast-apply';
 import type { SandboxState } from '@/types/sandbox';
 import type { ConversationState } from '@/types/conversation';
 import { syncFileToExternalFolder } from '@/lib/external-folder-sync';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
 
 declare global {
   var conversationState: ConversationState | null;
@@ -135,6 +136,9 @@ declare global {
 }
 
 export async function POST(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
+
   try {
     const { response, isEdit: isEditFromClient = false, packages = [] } = await request.json();
     const isEdit = isEditFromClient || !!global.projectPreloaded || (global.existingFiles && global.existingFiles.size > 0);

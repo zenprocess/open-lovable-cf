@@ -6,6 +6,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { checkRequiredEnvVars, resolveRequiredAIKey } from '@/lib/api/env-check';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
 // import type { FileManifest } from '@/types/file-manifest'; // Type is used implicitly through manifest parameter
 
 // Check if we're using Vercel AI Gateway
@@ -61,6 +62,9 @@ const searchPlanSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
+
   try {
     const { prompt, manifest, model = 'openai/gpt-oss-20b' } = await request.json();
     

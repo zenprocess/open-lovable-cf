@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { ConversationState } from '@/types/conversation';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
 
 declare global {
   var conversationState: ConversationState | null;
 }
 
 // GET: Retrieve current conversation state
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
   try {
     if (!global.conversationState) {
       return NextResponse.json({
@@ -31,6 +34,8 @@ export async function GET() {
 
 // POST: Reset or update conversation state
 export async function POST(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
   try {
     const { action, data } = await request.json();
     
@@ -140,7 +145,9 @@ export async function POST(request: NextRequest) {
 }
 
 // DELETE: Clear conversation state
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
   try {
     global.conversationState = null;
     

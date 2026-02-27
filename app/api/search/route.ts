@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
 
 export async function POST(req: NextRequest) {
+  const guard = checkLocalhost(req);
+  if (guard) return guard;
+
   try {
     const { query } = await req.json();
     

@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 
 export interface CodeApplicationState {
   stage: 'analyzing' | 'installing' | 'applying' | 'complete' | null;

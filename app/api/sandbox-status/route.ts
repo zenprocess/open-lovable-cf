@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { sandboxManager } from '@/lib/sandbox/sandbox-manager';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
 
 declare global {
   var activeSandboxProvider: any;
@@ -7,7 +8,9 @@ declare global {
   var existingFiles: Set<string>;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
   try {
     // Check sandbox manager first, then fall back to global state
     const provider = sandboxManager.getActiveProvider() || global.activeSandboxProvider;

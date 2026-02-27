@@ -1,67 +1,59 @@
-# Open Lovable
+# AI UI Builder
 
-Chat with AI to build React apps instantly. An example app made by the [Firecrawl](https://firecrawl.dev/?ref=open-lovable-github) team. For a complete cloud solution, check out [Lovable.dev](https://lovable.dev/) ❤️.
+AI-powered React UI sandbox — fork of [open-lovable-cf](https://github.com/zenprocess/open-lovable-cf) with E2B sandbox execution, multi-provider AI routing, and Claude Code integration.
 
-<img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmZtaHFleGRsMTNlaWNydGdianI4NGQ4dHhyZjB0d2VkcjRyeXBucCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ZFVLWMa6dVskQX0qu1/giphy.gif" alt="Open Lovable Demo" width="100%"/>
+Built on Next.js App Router. Runs standalone or embedded in the QuiClaude workspace.
 
-## Setup
+---
 
-1. **Clone & Install**
+## Quick Start
+
 ```bash
-git clone https://github.com/firecrawl/open-lovable.git
-cd open-lovable
-pnpm install  # or npm install / yarn install
+cd ui-builder
+pnpm install
+cp .env.example .env.local  # then fill in your keys
+pnpm dev                     # http://localhost:3000
 ```
 
-2. **Add `.env.local`**
+Minimum required keys: `E2B_API_KEY` and one AI provider key (`GEMINI_API_KEY` recommended).
 
-```env
-# =================================================================
-# REQUIRED
-# =================================================================
-FIRECRAWL_API_KEY=your_firecrawl_api_key    # https://firecrawl.dev
+---
 
-# =================================================================
-# AI PROVIDER - Choose your LLM
-# =================================================================
-GEMINI_API_KEY=your_gemini_api_key        # https://aistudio.google.com/app/apikey
-ANTHROPIC_API_KEY=your_anthropic_api_key  # https://console.anthropic.com
-OPENAI_API_KEY=your_openai_api_key        # https://platform.openai.com
-GROQ_API_KEY=your_groq_api_key            # https://console.groq.com
+## API Routes
 
-# =================================================================
-# FAST APPLY (Optional - for faster edits)
-# =================================================================
-MORPH_API_KEY=your_morphllm_api_key    # https://morphllm.com/dashboard
+| Route | Purpose |
+|-------|---------|
+| `POST /api/generate-ai-code-stream` | Stream AI-generated React code |
+| `POST /api/apply-ai-code` | Apply AI edits to sandbox files |
+| `POST /api/apply-ai-code-stream` | Stream AI edits |
+| `POST /api/create-ai-sandbox` | Spin up an E2B sandbox |
+| `POST /api/create-ai-sandbox-v2` | Sandbox v2 (package auto-install) |
+| `POST /api/kill-sandbox` | Terminate sandbox |
+| `POST /api/load-project` | Load project files into sandbox |
+| `POST /api/get-sandbox-files` | List files in sandbox |
+| `POST /api/detect-and-install-packages` | Auto-detect and install npm deps |
+| `POST /api/install-packages` | Install packages in sandbox |
+| `POST /api/create-zip` | Package sandbox as zip |
+| `POST /api/analyze-edit-intent` | Pre-edit intent analysis |
+| `POST /api/extract-brand-styles` | Extract styles via Firecrawl |
+| `GET  /api/conversation-state` | Retrieve conversation state |
+| `GET  /api/check-vite-errors` | Check Vite build errors |
+| `POST /api/monitor-vite-logs` | Stream Vite dev logs |
+| `POST /api/project-instructions` | Set per-project AI instructions |
 
-# =================================================================
-# SANDBOX PROVIDER - Choose ONE: Vercel (default) or E2B
-# =================================================================
-SANDBOX_PROVIDER=vercel  # or 'e2b'
+---
 
-# Option 1: Vercel Sandbox (default)
-# Choose one authentication method:
+## Environment Variables
 
-# Method A: OIDC Token (recommended for development)
-# Run `vercel link` then `vercel env pull` to get VERCEL_OIDC_TOKEN automatically
-VERCEL_OIDC_TOKEN=auto_generated_by_vercel_env_pull
+See `.env.example` for the full list. Key variables:
 
-# Method B: Personal Access Token (for production or when OIDC unavailable)
-# VERCEL_TEAM_ID=team_xxxxxxxxx      # Your Vercel team ID 
-# VERCEL_PROJECT_ID=prj_xxxxxxxxx    # Your Vercel project ID
-# VERCEL_TOKEN=vercel_xxxxxxxxxxxx   # Personal access token from Vercel dashboard
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `E2B_API_KEY` | Yes | E2B sandbox API key |
+| `GEMINI_API_KEY` | Yes* | Google Gemini (default AI provider) |
+| `ANTHROPIC_API_KEY` | Optional | Claude provider |
+| `OPENAI_API_KEY` | Optional | OpenAI provider |
+| `GROQ_API_KEY` | Optional | Groq provider |
+| `FIRECRAWL_API_KEY` | Optional | Brand style extraction |
 
-# Option 2: E2B Sandbox
-# E2B_API_KEY=your_e2b_api_key      # https://e2b.dev
-```
-
-3. **Run**
-```bash
-pnpm dev  # or npm run dev / yarn dev
-```
-
-Open [http://localhost:3000](http://localhost:3000)
-
-## License
-
-MIT
+*One AI provider key is required. Gemini is the default.

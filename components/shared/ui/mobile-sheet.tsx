@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
 import { useAtom } from "jotai";
 import { cn } from "@/utils/cn";

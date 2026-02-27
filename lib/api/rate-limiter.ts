@@ -39,10 +39,9 @@ export function checkRateLimit(ip: string): { allowed: true } | { allowed: false
 }
 
 /**
- * Extract a best-effort client IP from Next.js request headers.
+ * For a single-user localhost dev tool the client is always 127.0.0.1.
+ * We intentionally ignore X-Forwarded-For to prevent header spoofing.
  */
-export function getClientIP(request: Request): string {
-  const forwarded = request.headers.get('x-forwarded-for');
-  if (forwarded) return forwarded.split(',')[0].trim();
-  return request.headers.get('x-real-ip') ?? 'unknown';
+export function getClientIP(_request: Request): string {
+  return '127.0.0.1';
 }

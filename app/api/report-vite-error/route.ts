@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
 
 declare global {
   var viteErrors: any[];
@@ -10,6 +11,9 @@ if (!global.viteErrors) {
 }
 
 export async function POST(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
+
   try {
     const { error, file, type = 'runtime-error' } = await request.json();
     

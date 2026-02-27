@@ -1,13 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { parseJavaScriptFile, buildComponentTree } from '@/lib/file-parser';
 import { FileManifest, FileInfo, RouteInfo } from '@/types/file-manifest';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
 // SandboxState type used implicitly through global.activeSandboxProvider
 
 declare global {
   var activeSandboxProvider: any;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
   try {
     if (!global.activeSandboxProvider) {
       return NextResponse.json({
@@ -151,8 +154,8 @@ export async function GET() {
 }
 
 // POST alias so callers using POST (e.g. load-project manifest refresh) don't get 405
-export async function POST() {
-  return GET();
+export async function POST(request: NextRequest) {
+  return GET(request);
 }
 
 function extractRoutes(files: Record<string, FileInfo>): RouteInfo[] {

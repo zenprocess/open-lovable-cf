@@ -100,7 +100,7 @@ CORRECT APPROACH:
 
 EXPECTED OUTPUT:
 <file path="src/components/Hero.jsx">
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 // ... rest of Hero with motion animations
 </file>
 

@@ -1,10 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
 
 declare global {
   var viteErrorsCache: { errors: any[], timestamp: number } | null;
 }
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
   try {
     // Clear the cache
     global.viteErrorsCache = null;
