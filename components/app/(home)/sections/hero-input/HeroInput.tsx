@@ -28,6 +28,7 @@ export default function HeroInput() {
         <Globe />
 
         <input
+          data-testid="hero-input-url"
           className="w-full bg-transparent text-body-input text-accent-black placeholder:text-black-alpha-48"
           placeholder="https://example.com"
           type="text"
@@ -69,6 +70,7 @@ export default function HeroInput() {
         />
 
         <Link
+          data-testid="hero-input-playground-link"
           className="contents"
           href={`/playground?endpoint=${tab}&url=${url}&autorun=true`}
         >

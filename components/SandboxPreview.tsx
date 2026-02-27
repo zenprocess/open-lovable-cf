@@ -52,6 +52,7 @@ export default function SandboxPreview({
         </div>
         <div className="flex items-center gap-2">
           <button
+            data-testid="sandbox-toggle-console"
             onClick={() => setShowConsole(!showConsole)}
             className="p-2 hover:bg-gray-700 rounded transition-colors"
             title="Toggle console"
@@ -59,6 +60,7 @@ export default function SandboxPreview({
             <Terminal className="w-4 h-4" />
           </button>
           <button
+            data-testid="sandbox-refresh"
             onClick={handleRefresh}
             className="p-2 hover:bg-gray-700 rounded transition-colors"
             title="Refresh preview"
@@ -67,6 +69,7 @@ export default function SandboxPreview({
           </button>
           {previewUrl && (
             <a
+              data-testid="sandbox-open-external"
               href={previewUrl}
               target="_blank"
               rel="noopener noreferrer"

@@ -128,7 +128,6 @@ function parseAIResponse(response: string): ParsedResponse {
 }
 
 declare global {
-  var activeSandbox: any;
   var activeSandboxProvider: any;
   var existingFiles: Set<string>;
   var sandboxState: SandboxState;
@@ -159,7 +158,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Get the active sandbox or provider
-    const sandbox = global.activeSandbox || global.activeSandboxProvider;
+    const sandbox = global.activeSandboxProvider;
     
     // If no active sandbox, just return parsed results
     if (!sandbox) {
@@ -343,14 +342,14 @@ export async function POST(request: NextRequest) {
     const morphUpdatedPaths = new Set<string>();
 
     if (morphEnabled && morphEdits.length > 0) {
-      if (!global.activeSandbox) {
+      if (!global.activeSandboxProvider) {
         console.warn('[apply-ai-code] Morph edits found but no active sandbox; skipping Morph application');
       } else {
         console.log(`[apply-ai-code] Applying ${morphEdits.length} fast edits via Morph...`);
         for (const edit of morphEdits) {
           try {
             const result = await applyMorphEditToFile({
-              sandbox: global.activeSandbox,
+              sandbox: global.activeSandboxProvider,
               targetPath: edit.targetFile,
               instructions: edit.instructions,
               updateSnippet: edit.update
@@ -619,44 +618,18 @@ body {
     // Execute commands
     for (const cmd of parsed.commands) {
       try {
-        // Parse command and arguments
-        const commandParts = cmd.trim().split(/\s+/);
-        const cmdName = commandParts[0];
-        const args = commandParts.slice(1);
-        
-        // Execute command using sandbox
+        // Execute command using SandboxProvider interface (takes a single string)
         let result;
         if (sandbox.runCommand && typeof sandbox.runCommand === 'function') {
-          // Check if this is a provider pattern sandbox
-          const testResult = await sandbox.runCommand(cmd);
-          if (testResult && typeof testResult === 'object' && 'stdout' in testResult) {
-            // Provider returns CommandResult directly
-            result = testResult;
-          } else {
-            // Direct sandbox - expects object with cmd and args
-            result = await sandbox.runCommand({
-              cmd: cmdName,
-              args
-            });
-          }
+          result = await sandbox.runCommand(cmd);
         }
         
         console.log(`Executed: ${cmd}`);
         
-        // Handle result based on type
-        let stdout = '';
-        let stderr = '';
-        
-        if (result) {
-          if (typeof result.stdout === 'string') {
-            stdout = result.stdout;
-            stderr = result.stderr || '';
-          } else if (typeof result.stdout === 'function') {
-            stdout = await result.stdout();
-            stderr = await result.stderr();
-          }
-        }
-        
+        // Handle result - provider returns CommandResult with string stdout/stderr
+        const stdout = result?.stdout || '';
+        const stderr = result?.stderr || '';
+
         if (stdout) console.log(stdout);
         if (stderr) console.log(`Errors: ${stderr}`);
         

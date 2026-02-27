@@ -111,6 +111,7 @@ export default function HeroInput({
 
           <textarea
             ref={textareaRef}
+            data-testid="hero-input-textarea"
             className="w-full bg-transparent text-body-input text-accent-black placeholder:text-black-alpha-48 resize-none outline-none min-h-[24px] leading-6"
             placeholder={placeholder}
             value={value}
@@ -133,6 +134,7 @@ export default function HeroInput({
 
         <div className="p-10 flex justify-end items-center relative">
           <button
+            data-testid="hero-input-submit"
             onClick={onSubmit}
             disabled={!value.trim()}
             className={`

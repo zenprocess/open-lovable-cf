@@ -536,7 +536,7 @@ export async function POST(request: NextRequest) {
         // If Morph is enabled and we have edits, apply them before file writes
         const morphUpdatedPaths = new Set<string>();
         if (morphEnabled && morphEdits.length > 0) {
-          const morphSandbox = (global as any).activeSandbox || providerInstance;
+          const morphSandbox = (global as any).activeSandboxProvider || providerInstance;
           if (!morphSandbox) {
             console.warn('[apply-ai-code-stream] No sandbox available to apply Morph edits');
             await sendProgress({ type: 'warning', message: 'No sandbox available to apply Morph edits' });

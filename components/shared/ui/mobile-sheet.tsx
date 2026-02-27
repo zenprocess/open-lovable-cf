@@ -189,6 +189,7 @@ export function MobileSheet({
                   )}
                   {showCloseButton && (
                     <button
+                      data-testid="mobile-sheet-close"
                       onClick={handleClose}
                       className={cn(
                         "h-32 w-32 flex items-center justify-center transition-all rounded-6 border border-border-faint",

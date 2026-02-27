@@ -13,6 +13,7 @@ export default function Textarea(
       )}
     >
       <textarea
+        data-testid="shadcn-textarea"
         className="outline-none w-full resize-none bg-transparent"
         {...textareaProps}
       />

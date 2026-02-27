@@ -74,6 +74,7 @@ export function CapsuleButton({
 
   return (
     <button
+      data-testid="capsule-button"
       className={cn(
         // Base styles
         "inline-flex items-center justify-center rounded-full  transition-all duration-200",

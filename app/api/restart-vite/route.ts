@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 
 declare global {
-  var activeSandbox: any;
   var activeSandboxProvider: any;
   var lastViteRestartTime: number;
   var viteRestartInProgress: boolean;
@@ -11,8 +10,7 @@ const RESTART_COOLDOWN_MS = 5000; // 5 second cooldown between restarts
 
 export async function POST() {
   try {
-    // Check both v1 and v2 global references
-    const provider = global.activeSandbox || global.activeSandboxProvider;
+    const provider = global.activeSandboxProvider;
     
     if (!provider) {
       return NextResponse.json({ 

@@ -246,14 +246,16 @@ export default function BuilderPage() {
             {!isLoading && (
               <button
                 onClick={downloadCode}
+                data-testid="builder-download-code-btn"
                 className="w-full py-12 px-16 bg-heat-100 hover:bg-heat-200 text-white rounded-10 text-label-medium transition-all"
               >
                 Download Code
               </button>
             )}
-            
+
             <button
               onClick={() => router.push('/')}
+              data-testid="builder-start-over-btn"
               className="w-full py-12 px-16 bg-black-alpha-4 hover:bg-black-alpha-6 rounded-10 text-label-medium transition-all"
             >
               Start Over

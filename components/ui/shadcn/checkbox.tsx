@@ -11,6 +11,7 @@ export default function Checkbox({
 }) {
   return (
     <button
+      data-testid="shadcn-checkbox"
       className="size-20 p-3 relative"
       type="button"
       onClick={() => onChange?.(!checked)}

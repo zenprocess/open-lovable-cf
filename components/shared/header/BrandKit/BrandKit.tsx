@@ -34,6 +34,7 @@ export default function HeaderBrandKit() {
   return (
     <div className="relative">
       <Link
+        data-testid="brand-kit-logo-link"
         className="flex items-center gap-2 relative brand-kit-menu"
         href="/"
         onContextMenu={(e) => {
@@ -126,6 +127,7 @@ const Menu = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
       />
 
       <Button
+        data-testid="brand-kit-open-new-tab"
         onClick={() => {
           window.open("/", "_blank");
           setOpen(false);
@@ -155,6 +157,7 @@ const Menu = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
       </div>
 
       <Button
+        data-testid="brand-kit-copy-svg"
         onClick={() => {
           copy(`<svg fill="none" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg">
   <path
@@ -173,6 +176,7 @@ const Menu = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
       </Button>
 
       <Button
+        data-testid="brand-kit-download"
         onClick={() => {
           setOpen(false);
         }}
@@ -188,6 +192,7 @@ const Menu = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
       </div>
 
       <Button
+        data-testid="brand-kit-guidelines"
         onClick={() => {
           setOpen(false);
         }}

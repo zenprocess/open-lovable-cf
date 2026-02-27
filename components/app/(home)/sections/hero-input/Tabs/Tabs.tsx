@@ -101,6 +101,7 @@ export default function HeroInputTabs(props: {
           )}
 
           <button
+            data-testid={`hero-tab-${tab.value}`}
             className={cn(
               "text-label-medium p-6 relative transition-all group flex items-center",
               tab.value === props.tab

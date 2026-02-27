@@ -29,6 +29,7 @@ const Checkbox = React.forwardRef<HTMLDivElement, CheckboxProps>(
         className={cn("flex items-center gap-2", className)}
       >
         <button
+          data-testid="checkbox"
           type="button"
           onClick={handleToggle}
           disabled={disabled}

@@ -82,6 +82,7 @@ export default function Tabs({
             )}
 
             <button
+              data-testid={`tab-${tab.value}`}
               className={cn(
                 "py-12 px-24 flex gap-4 justify-center items-center w-full relative z-[3] transition-colors",
                 activeTab === tab.value
