@@ -27,6 +27,9 @@ export async function PUT(request: Request) {
   if (typeof text !== 'string') {
     return NextResponse.json({ error: 'text must be a string' }, { status: 400 });
   }
+  if (text.length > 10000) {
+    return NextResponse.json({ error: 'text exceeds 10,000 character limit' }, { status: 400 });
+  }
   global.projectInstructions = { text, autoDetected: false };
   return NextResponse.json({ success: true, text });
 }

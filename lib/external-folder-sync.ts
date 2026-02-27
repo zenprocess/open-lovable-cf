@@ -34,8 +34,15 @@ export function syncFileToExternalFolder(filePath: string, content: string): voi
   try {
     const normalizedFile = filePath.replace(/^\/+/, '');
     const targetPath = path.resolve(EXTERNAL_FOLDER, normalizedFile);
-    const targetDir = path.dirname(targetPath);
 
+    // Prevent path traversal — resolved path must stay within EXTERNAL_FOLDER
+    const realExternal = path.resolve(EXTERNAL_FOLDER);
+    if (!targetPath.startsWith(realExternal + path.sep) && targetPath !== realExternal) {
+      console.error(`[external-folder-sync] Path traversal blocked: ${filePath}`);
+      return;
+    }
+
+    const targetDir = path.dirname(targetPath);
     if (!fs.existsSync(targetDir)) {
       fs.mkdirSync(targetDir, { recursive: true });
     }
@@ -56,6 +63,14 @@ export function syncDeleteToExternalFolder(filePath: string): void {
   try {
     const normalizedFile = filePath.replace(/^\/+/, '');
     const targetPath = path.resolve(EXTERNAL_FOLDER, normalizedFile);
+
+    // Prevent path traversal
+    const realExternal = path.resolve(EXTERNAL_FOLDER);
+    if (!targetPath.startsWith(realExternal + path.sep) && targetPath !== realExternal) {
+      console.error(`[external-folder-sync] Path traversal blocked: ${filePath}`);
+      return;
+    }
+
     if (fs.existsSync(targetPath)) {
       fs.unlinkSync(targetPath);
       console.log(`[external-folder-sync] Deleted: ${targetPath}`);

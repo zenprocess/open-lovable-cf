@@ -47,12 +47,20 @@ export async function POST(request: Request) {
       try {
         const normalizedPath = file.path.replace(/^\/+/, '');
 
+        // Reject paths with traversal attempts
+        if (normalizedPath.includes('..') || normalizedPath.includes('\0')) {
+          results.errors.push(`${file.path}: path traversal rejected`);
+          continue;
+        }
+
         // Create directory in sandbox if needed
         const dirPath = normalizedPath.includes('/')
           ? normalizedPath.substring(0, normalizedPath.lastIndexOf('/'))
           : '';
         if (dirPath) {
-          await global.activeSandboxProvider.runCommand(`mkdir -p ${dirPath}`);
+          // Shell-escape the path to prevent command injection
+          const safeDirPath = dirPath.replace(/'/g, "'\\''");
+          await global.activeSandboxProvider.runCommand(`mkdir -p '${safeDirPath}'`);
         }
 
         // Write to sandbox

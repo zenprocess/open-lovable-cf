@@ -35,15 +35,18 @@ export async function GET() {
 
     for (const filePath of fileList) {
       try {
+        // Shell-escape file path to prevent injection from special characters
+        const safePath = filePath.replace(/'/g, "'\\''");
+
         // Check file size first
-        const statResult = await global.activeSandboxProvider.runCommand(`stat -c %s ${filePath} 2>/dev/null || stat -f %z ${filePath}`);
+        const statResult = await global.activeSandboxProvider.runCommand(`stat -c %s '${safePath}' 2>/dev/null || stat -f %z '${safePath}'`);
 
         if (statResult.exitCode === 0) {
           const fileSize = parseInt(statResult.stdout || '0');
 
           // Only read files smaller than 10KB
           if (fileSize < 10000) {
-            const catResult = await global.activeSandboxProvider.runCommand(`cat ${filePath}`);
+            const catResult = await global.activeSandboxProvider.runCommand(`cat '${safePath}'`);
 
             if (catResult.exitCode === 0) {
               const content = catResult.stdout || '';
