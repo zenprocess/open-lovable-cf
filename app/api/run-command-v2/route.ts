@@ -1,22 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { SandboxProvider } from '@/lib/sandbox/types';
 import { sandboxManager } from '@/lib/sandbox/sandbox-manager';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
 
 // Get active sandbox provider from global state
 declare global {
   var activeSandboxProvider: any;
 }
 
+const RunCommandSchema = z.object({
+  command: z.string().min(1, 'Command is required').max(1000, 'Command must be at most 1000 characters'),
+});
+
 export async function POST(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
+
   try {
-    const { command } = await request.json();
-    
-    if (!command) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Command is required' 
+    const body = await request.json();
+    const parsed = RunCommandSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({
+        success: false,
+        error: parsed.error.errors[0]?.message ?? 'Invalid input',
       }, { status: 400 });
     }
+    const { command } = parsed.data;
     
     // Get provider from sandbox manager or global state
     const provider = sandboxManager.getActiveProvider() || global.activeSandboxProvider;

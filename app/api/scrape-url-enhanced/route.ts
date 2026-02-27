@@ -1,4 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
+
+// Reject private/loopback network ranges in scraped URLs
+const BLOCKED_HOSTS = /^(localhost|127\.\d+\.\d+\.\d+|::1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|169\.254\.\d+\.\d+)/i;
+
+const ScrapeUrlSchema = z.object({
+  url: z
+    .string()
+    .url('Must be a valid URL')
+    .refine((u) => {
+      try {
+        const parsed = new URL(u);
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+        return !BLOCKED_HOSTS.test(parsed.hostname);
+      } catch {
+        return false;
+      }
+    }, 'URL must use http/https and must not point to a private network address'),
+});
 
 // Function to sanitize smart quotes and other problematic characters
 function sanitizeQuotes(text: string): string {
@@ -17,16 +37,20 @@ function sanitizeQuotes(text: string): string {
 }
 
 export async function POST(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
+
   try {
-    const { url } = await request.json();
-    
-    if (!url) {
+    const body = await request.json();
+    const parsed = ScrapeUrlSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json({
         success: false,
-        error: 'URL is required'
+        error: parsed.error.errors[0]?.message ?? 'Invalid input',
       }, { status: 400 });
     }
-    
+    const { url } = parsed.data;
+
     console.log('[scrape-url-enhanced] Scraping with Firecrawl:', url);
     
     const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY;

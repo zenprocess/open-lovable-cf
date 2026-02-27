@@ -1,10 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
 
 declare global {
   var activeSandboxProvider: any;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
   try {
     if (!global.activeSandboxProvider) {
       return NextResponse.json({

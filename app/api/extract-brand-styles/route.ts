@@ -1,10 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
+
+const BLOCKED_HOSTS = /^(localhost|127\.\d+\.\d+\.\d+|::1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|169\.254\.\d+\.\d+)/i;
+
+const ExtractBrandSchema = z.object({
+  url: z
+    .string()
+    .url('Must be a valid URL')
+    .refine((u) => {
+      try {
+        const parsed = new URL(u);
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+        return !BLOCKED_HOSTS.test(parsed.hostname);
+      } catch {
+        return false;
+      }
+    }, 'URL must use http/https and must not point to a private network address'),
+  prompt: z.string().max(2000).optional(),
+});
 
 export async function POST(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
+
   try {
     const body = await request.json();
-    const url = body.url;
-    const prompt = body.prompt;
+    const parsed = ExtractBrandSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, error: parsed.error.errors[0]?.message ?? 'Invalid input' },
+        { status: 400 }
+      );
+    }
+    const url = parsed.data.url;
+    const prompt = parsed.data.prompt;
 
     console.log('[extract-brand-styles] Extracting brand styles for:', url);
     console.log('[extract-brand-styles] User prompt:', prompt);

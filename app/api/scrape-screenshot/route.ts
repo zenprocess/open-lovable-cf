@@ -1,13 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import FirecrawlApp from '@mendable/firecrawl-js';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
+
+const BLOCKED_HOSTS = /^(localhost|127\.\d+\.\d+\.\d+|::1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|169\.254\.\d+\.\d+)/i;
+
+const ScrapeScreenshotSchema = z.object({
+  url: z
+    .string()
+    .url('Must be a valid URL')
+    .refine((u) => {
+      try {
+        const parsed = new URL(u);
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+        return !BLOCKED_HOSTS.test(parsed.hostname);
+      } catch {
+        return false;
+      }
+    }, 'URL must use http/https and must not point to a private network address'),
+});
 
 export async function POST(req: NextRequest) {
+  const guard = checkLocalhost(req);
+  if (guard) return guard;
+
   try {
-    const { url } = await req.json();
-    
-    if (!url) {
-      return NextResponse.json({ error: 'URL is required' }, { status: 400 });
+    const body = await req.json();
+    const parsed = ScrapeScreenshotSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.errors[0]?.message ?? 'Invalid input' },
+        { status: 400 }
+      );
     }
+    const { url } = parsed.data;
 
     // Initialize Firecrawl with API key from environment
     const apiKey = process.env.FIRECRAWL_API_KEY;

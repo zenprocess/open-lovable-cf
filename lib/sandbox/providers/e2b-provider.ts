@@ -81,10 +81,10 @@ export class E2BProvider extends SandboxProvider {
       import os
 
       os.chdir('/home/user/app')
-      result = subprocess.run(${JSON.stringify(command.split(' '))}, 
-                            capture_output=True, 
-                            text=True, 
-                            shell=False)
+      result = subprocess.run(${JSON.stringify(command)},
+                            capture_output=True,
+                            text=True,
+                            shell=True)
 
       print("STDOUT:")
       print(result.stdout)
@@ -119,17 +119,19 @@ export class E2BProvider extends SandboxProvider {
       await (this.sandbox as any).files.write(fullPath, Buffer.from(content));
     } else {
       // Fallback to Python code execution
+      // Use JSON.stringify for path to prevent injection via quote characters
+      const pyPath = JSON.stringify(fullPath);
       await this.sandbox.runCode(`
         import os
 
         # Ensure directory exists
-        dir_path = os.path.dirname("${fullPath}")
+        dir_path = os.path.dirname(${pyPath})
         os.makedirs(dir_path, exist_ok=True)
 
         # Write file
-        with open("${fullPath}", 'w') as f:
+        with open(${pyPath}, 'w') as f:
             f.write(${JSON.stringify(content)})
-        print(f"✓ Written: ${fullPath}")
+        print(f"Written: {${pyPath}}")
       `);
     }
     
@@ -143,8 +145,9 @@ export class E2BProvider extends SandboxProvider {
 
     const fullPath = path.startsWith('/') ? path : `/home/user/app/${path}`;
     
+    const pyReadPath = JSON.stringify(fullPath);
     const result = await this.sandbox.runCode(`
-      with open("${fullPath}", 'r') as f:
+      with open(${pyReadPath}, 'r') as f:
           content = f.read()
       print(content)
     `);
@@ -187,10 +190,19 @@ export class E2BProvider extends SandboxProvider {
       throw new Error('No active sandbox');
     }
 
-    const packageList = packages.join(' ');
+    // Validate package names to prevent injection via single-quote escape
+    const packageNameRe = /^[@a-zA-Z0-9][\w.\-/]*$/;
+    for (const pkg of packages) {
+      if (!packageNameRe.test(pkg)) {
+        throw new Error(`Invalid package name: ${pkg}`);
+      }
+    }
+
     const flags = appConfig.packages.useLegacyPeerDeps ? '--legacy-peer-deps' : '';
-    
-    
+    // Build the Python list literal using JSON.stringify for each item
+    const pyPackageList = packages.map(p => JSON.stringify(p)).join(', ');
+    const pyFlags = flags ? `${JSON.stringify(flags)}, ` : '';
+
     const result = await this.sandbox.runCode(`
       import subprocess
       import os
@@ -199,7 +211,7 @@ export class E2BProvider extends SandboxProvider {
 
       # Install packages
       result = subprocess.run(
-          ['npm', 'install', ${flags ? `'${flags}',` : ''} ${packages.map(p => `'${p}'`).join(', ')}],
+          ['npm', 'install', ${pyFlags}${pyPackageList}],
           capture_output=True,
           text=True
       )

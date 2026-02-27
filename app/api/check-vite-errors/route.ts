@@ -1,9 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
 
-// Stub endpoint to prevent 404 errors
-// This endpoint is being called but the source is unknown
-// Returns empty errors array to satisfy any calling code
-export async function GET() {
+// Returns empty errors array — Vite error tracking is handled via /api/report-vite-error
+// and read back via the global viteErrors store. This endpoint exists for compatibility.
+export async function GET(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
+
   return NextResponse.json({
     success: true,
     errors: [],

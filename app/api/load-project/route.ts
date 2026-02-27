@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { syncFileToExternalFolder } from '@/lib/external-folder-sync';
 import { extractApiSpec } from '@/lib/api-spec-extractor';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
 
 /**
  * POST /api/load-project
@@ -21,7 +22,10 @@ declare global {
   var projectInstructions: { text: string; autoDetected: boolean } | null;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
+
   try {
     const { files } = await request.json();
 

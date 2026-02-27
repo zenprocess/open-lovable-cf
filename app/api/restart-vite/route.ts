@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
 
 declare global {
   var activeSandboxProvider: any;
@@ -8,7 +9,9 @@ declare global {
 
 const RESTART_COOLDOWN_MS = 5000; // 5 second cooldown between restarts
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
   try {
     const provider = global.activeSandboxProvider;
     

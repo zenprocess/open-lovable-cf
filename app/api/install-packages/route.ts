@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
 
 declare global {
   var activeSandbox: any;
@@ -7,6 +8,9 @@ declare global {
 }
 
 export async function POST(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
+
   try {
     const { packages } = await request.json();
     // sandboxId not used - using global sandbox

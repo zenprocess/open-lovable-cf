@@ -5,6 +5,7 @@ import type { SandboxState } from '@/types/sandbox';
 import type { ConversationState } from '@/types/conversation';
 import { sandboxManager } from '@/lib/sandbox/sandbox-manager';
 import { syncFileToExternalFolder } from '@/lib/external-folder-sync';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
 
 declare global {
   var conversationState: ConversationState | null;
@@ -263,6 +264,9 @@ function parseAIResponse(response: string): ParsedResponse {
 }
 
 export async function POST(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
+
   try {
     const { response, isEdit = false, packages = [], sandboxId } = await request.json();
 

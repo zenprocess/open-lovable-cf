@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { SandboxFactory } from '@/lib/sandbox/factory';
 import { checkRequiredEnvVars } from '@/lib/api/env-check';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
 // SandboxProvider type is used through SandboxFactory
 import type { SandboxState } from '@/types/sandbox';
 import { sandboxManager } from '@/lib/sandbox/sandbox-manager';
@@ -13,7 +14,10 @@ declare global {
   var sandboxState: SandboxState;
 }
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
+
   // --- Env var guard ---
   const envError = checkRequiredEnvVars(['E2B_API_KEY']);
   if (envError) return envError;

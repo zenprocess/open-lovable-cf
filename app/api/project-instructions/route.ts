@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { checkLocalhost } from '@/lib/api/localhost-guard';
 
 /**
  * GET/PUT /api/project-instructions
@@ -15,7 +16,9 @@ declare global {
   var projectInstructions: { text: string; autoDetected: boolean } | null;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
   return NextResponse.json({
     text: global.projectInstructions?.text || '',
     autoDetected: global.projectInstructions?.autoDetected || false,
@@ -23,7 +26,9 @@ export async function GET() {
   });
 }
 
-export async function PUT(request: Request) {
+export async function PUT(request: NextRequest) {
+  const guard = checkLocalhost(request);
+  if (guard) return guard;
   const { text } = await request.json();
   if (typeof text !== 'string') {
     return NextResponse.json({ error: 'text must be a string' }, { status: 400 });
