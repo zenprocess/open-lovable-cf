@@ -12,6 +12,7 @@ declare global {
   var sandboxState: SandboxState;
   var sandboxCreationInProgress: boolean;
   var sandboxCreationPromise: Promise<any> | null;
+  var projectPreloaded: boolean;
 }
 
 export async function POST(request: Request) {
@@ -141,6 +142,38 @@ async function createSandboxInternal() {
     global.existingFiles.add('vite.config.js');
     global.existingFiles.add('tailwind.config.js');
     global.existingFiles.add('postcss.config.js');
+
+    // Auto-load files from EXTERNAL_FOLDER if set (persists work across restarts)
+    if (process.env.EXTERNAL_FOLDER) {
+      try {
+        const { readExternalFolderFiles } = await import('@/lib/external-folder-sync');
+        const externalFiles = readExternalFolderFiles();
+        if (externalFiles.length > 0) {
+          console.log(`[create-ai-sandbox] Auto-loading ${externalFiles.length} files from EXTERNAL_FOLDER`);
+          for (const file of externalFiles) {
+            try {
+              const dirPath = file.path.includes('/') ? file.path.substring(0, file.path.lastIndexOf('/')) : '';
+              if (dirPath) {
+                const safeDirPath = dirPath.replace(/'/g, "'\\''");
+                await provider.runCommand(`mkdir -p '${safeDirPath}'`);
+              }
+              await provider.writeFile(file.path, file.content);
+              global.existingFiles.add(file.path);
+              global.sandboxState!.fileCache!.files[file.path] = {
+                content: file.content,
+                lastModified: Date.now(),
+              };
+            } catch (e: any) {
+              console.warn(`[create-ai-sandbox] Failed to load ${file.path}:`, e.message);
+            }
+          }
+          global.projectPreloaded = true;
+          console.log(`[create-ai-sandbox] Loaded ${externalFiles.length} files from EXTERNAL_FOLDER`);
+        }
+      } catch (e) {
+        console.warn('[create-ai-sandbox] Failed to read EXTERNAL_FOLDER:', e);
+      }
+    }
 
     const result = {
       success: true,
