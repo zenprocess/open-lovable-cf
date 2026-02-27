@@ -235,12 +235,12 @@ function AISandboxPage() {
   // Auto-start generation from session flag
   useEffect(() => {
     const autoStart = sessionStorage.getItem('autoStart');
-    if (autoStart === 'true' && !showHomeScreen && homeUrlInput) {
+    if (autoStart === 'true' && !showHomeScreen && homeUrlInput && !loading) {
       sessionStorage.removeItem('autoStart');
       setTimeout(() => { startGeneration(); }, 1000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showHomeScreen, homeUrlInput]);
+  }, [showHomeScreen, homeUrlInput, loading]);
 
   // Sandbox status check on mount
   useEffect(() => {

@@ -38,7 +38,13 @@ export async function GET(request: NextRequest) {
 
     for (const filePath of fileList) {
       try {
-        // Shell-escape file path to prevent injection from special characters
+        // Reject paths with suspicious characters (traversal, null bytes, shell metacharacters)
+        if (/[`$;\0|&]|\.\./.test(filePath)) {
+          console.warn(`[get-sandbox-files] Skipping suspicious path: ${filePath}`);
+          continue;
+        }
+
+        // Shell-escape: wrap in single quotes, escape embedded single quotes
         const safePath = filePath.replace(/'/g, "'\\''");
 
         // Check file size first
