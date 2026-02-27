@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { parseMorphEdits, applyMorphEditToFile } from '@/lib/morph-fast-apply';
 import type { SandboxState } from '@/types/sandbox';
 import type { ConversationState } from '@/types/conversation';
+import { syncFileToExternalFolder } from '@/lib/external-folder-sync';
 
 declare global {
   var conversationState: ConversationState | null;
@@ -135,7 +136,8 @@ declare global {
 
 export async function POST(request: NextRequest) {
   try {
-    const { response, isEdit = false, packages = [] } = await request.json();
+    const { response, isEdit: isEditFromClient = false, packages = [] } = await request.json();
+    const isEdit = isEditFromClient || !!global.projectPreloaded || (global.existingFiles && global.existingFiles.size > 0);
     
     if (!response) {
       return NextResponse.json({
@@ -453,7 +455,10 @@ export async function POST(request: NextRequest) {
             throw new Error('Unsupported sandbox type');
           }
           console.log(`[apply-ai-code] Successfully wrote file: ${fullPath}`);
-          
+
+          // Mirror to external folder if configured
+          syncFileToExternalFolder(normalizedPath, fileContent);
+
           // Update file cache
           if (global.sandboxState?.fileCache) {
             global.sandboxState.fileCache.files[normalizedPath] = {
