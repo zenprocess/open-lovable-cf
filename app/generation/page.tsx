@@ -290,6 +290,21 @@ function AISandboxPage() {
           // and the startGeneration function is defined
           sessionStorage.setItem('autoStart', 'true');
         }
+        // Re-fetch project status after sandbox creation (files may have been auto-loaded from EXTERNAL_FOLDER)
+        if (isMounted) {
+          try {
+            const instrRes = await fetch('/api/project-instructions');
+            const instrData = await instrRes.json();
+            if (instrData.text) {
+              setProjectInstructions(instrData.text);
+              setInstructionsExpanded(true);
+            }
+            if (instrData.hasProject) {
+              setHasPreloadedProject(true);
+            }
+            setProjectLoading(false);
+          } catch { /* initial fetch will handle */ }
+        }
       } catch (error) {
         console.error('[ai-sandbox] Failed to create or restore sandbox:', error);
         if (isMounted) {
