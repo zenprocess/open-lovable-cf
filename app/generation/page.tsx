@@ -111,6 +111,8 @@ function AISandboxPage() {
   const [projectInstructions, setProjectInstructions] = useState('');
   const [instructionsExpanded, setInstructionsExpanded] = useState(false);
   const [instructionsDirty, setInstructionsDirty] = useState(false);
+  const [hasPreloadedProject, setHasPreloadedProject] = useState(false);
+  const [projectLoading, setProjectLoading] = useState(true);
   
   const [conversationContext, setConversationContext] = useState<{
     scrapedWebsites: Array<{ url: string; content: any; timestamp: Date }>;
@@ -308,7 +310,7 @@ function AISandboxPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run only on mount
 
-  // Fetch preloaded instructions (auto-detected API spec or user-edited)
+  // Fetch preloaded instructions and project status
   useEffect(() => {
     fetch('/api/project-instructions')
       .then(r => r.json())
@@ -317,8 +319,12 @@ function AISandboxPage() {
           setProjectInstructions(data.text);
           setInstructionsExpanded(true);
         }
+        if (data.hasProject) {
+          setHasPreloadedProject(true);
+        }
+        setProjectLoading(false);
       })
-      .catch(() => {}); // Non-critical
+      .catch(() => { setProjectLoading(false); });
   }, []);
 
   useEffect(() => {
@@ -1153,7 +1159,7 @@ Tip: I automatically detect and install npm packages from your code imports (lik
 //     }
 //     
 //     // Determine if this is an edit based on whether we have applied code before
-//     const isEdit = conversationContext.appliedCode.length > 0;
+//     const isEdit = conversationContext.appliedCode.length > 0 || hasPreloadedProject;
 //     await applyGeneratedCode(code, isEdit);
 //   };
 
@@ -1772,7 +1778,7 @@ Tip: I automatically detect and install npm packages from your code imports (lik
     }
     
     // Determine if this is an edit
-    const isEdit = conversationContext.appliedCode.length > 0;
+    const isEdit = conversationContext.appliedCode.length > 0 || hasPreloadedProject;
     
     try {
       // Generation tab is already active from scraping phase
@@ -1811,8 +1817,9 @@ Tip: I automatically detect and install npm packages from your code imports (lik
       // Debug what we're sending
       console.log('[chat] Sending context to AI:');
       console.log('[chat] - sandboxId:', fullContext.sandboxId);
-      console.log('[chat] - isEdit:', conversationContext.appliedCode.length > 0);
-      
+      const clientIsEdit = conversationContext.appliedCode.length > 0 || hasPreloadedProject;
+      console.log('[chat] - isEdit:', clientIsEdit, '(appliedCode:', conversationContext.appliedCode.length, 'preloaded:', hasPreloadedProject, ')');
+
       const response = await fetch('/api/generate-ai-code-stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1820,7 +1827,7 @@ Tip: I automatically detect and install npm packages from your code imports (lik
           prompt: message,
           model: aiModel,
           context: fullContext,
-          isEdit: conversationContext.appliedCode.length > 0
+          isEdit: clientIsEdit
         })
       });
       
@@ -2227,7 +2234,7 @@ Tip: I automatically detect and install npm packages from your code imports (lik
     }
     
     addChatMessage('Re-applying last generation...', 'system');
-    const isEdit = conversationContext.appliedCode.length > 0;
+    const isEdit = conversationContext.appliedCode.length > 0 || hasPreloadedProject;
     await applyGeneratedCode(conversationContext.lastGeneratedCode, isEdit);
   };
 
@@ -3869,6 +3876,17 @@ Focus on the key sections and content, making it clean and modern.`;
             )}
           </div>
 
+          {/* Loading indicator for project preload */}
+          {projectLoading && (
+            <div className="border-t border-border bg-background-base px-4 py-2 flex items-center gap-2 text-xs text-gray-500">
+              <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              Loading project files...
+            </div>
+          )}
+
           {/* Preloaded Instructions — editable context for the AI */}
           <div className="border-t border-border bg-background-base">
             <button
@@ -3892,21 +3910,28 @@ Focus on the key sections and content, making it clean and modern.`;
                     setProjectInstructions(e.target.value);
                     setInstructionsDirty(true);
                   }}
-                  onBlur={() => {
-                    if (instructionsDirty) {
-                      fetch('/api/project-instructions', {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ text: projectInstructions }),
-                      }).then(() => setInstructionsDirty(false)).catch(() => {});
-                    }
-                  }}
                   placeholder="Add context for the AI (e.g., backend API endpoints, design conventions, constraints)..."
                   className="w-full h-20 text-xs bg-gray-50 border border-gray-200 rounded-md p-2 resize-y focus:outline-none focus:ring-1 focus:ring-blue-300 placeholder:text-gray-400"
                 />
-                <p className="text-[10px] text-gray-400 mt-1">
-                  {projectInstructions ? 'These instructions are included in every AI prompt.' : 'Empty — auto-populated when a project with backend workers is loaded.'}
-                </p>
+                <div className="flex items-center justify-between mt-1">
+                  <p className="text-[10px] text-gray-400">
+                    {projectInstructions ? 'These instructions are included in every AI prompt.' : 'Empty — auto-populated when a project with backend workers is loaded.'}
+                  </p>
+                  {instructionsDirty && (
+                    <button
+                      onClick={() => {
+                        fetch('/api/project-instructions', {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ text: projectInstructions }),
+                        }).then(() => setInstructionsDirty(false)).catch(() => {});
+                      }}
+                      className="px-2 py-0.5 text-[10px] bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                    >
+                      Save
+                    </button>
+                  )}
+                </div>
               </div>
             )}
           </div>
