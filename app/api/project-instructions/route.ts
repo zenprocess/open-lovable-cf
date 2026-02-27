@@ -11,6 +11,7 @@ import { NextResponse } from 'next/server';
  */
 
 declare global {
+  var projectPreloaded: boolean;
   var projectInstructions: { text: string; autoDetected: boolean } | null;
 }
 
