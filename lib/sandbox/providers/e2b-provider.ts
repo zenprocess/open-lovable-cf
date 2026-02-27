@@ -80,11 +80,12 @@ export class E2BProvider extends SandboxProvider {
       import subprocess
       import os
 
+      import shlex
       os.chdir('/home/user/app')
-      result = subprocess.run(${JSON.stringify(command)},
+      result = subprocess.run(shlex.split(${JSON.stringify(command)}),
                             capture_output=True,
                             text=True,
-                            shell=True)
+                            shell=False)
 
       print("STDOUT:")
       print(result.stdout)

@@ -1,38 +1,10 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { checkRateLimit, getClientIP } from '@/lib/api/rate-limiter';
 
-// ---------------------------------------------------------------------------
-// getClientIP — the Next.js/Vite transform stubs server modules in the jsdom
-// environment so that `getClientIP` from the compiled module returns the
-// loopback address. We instead test the IP-extraction logic directly using the
-// same algorithm as the source, which is a pure function over headers.
-//
-// The rate-limiter logic (checkRateLimit) works correctly because it has no
-// Request dependency; those tests remain below.
-// ---------------------------------------------------------------------------
-
-/** Replicate getClientIP logic for unit-testing independent of the Next.js transform. */
-function extractClientIP(headers: Record<string, string | undefined>): string {
-  const forwarded = headers['x-forwarded-for'];
-  if (forwarded) return forwarded.split(',')[0].trim();
-  return headers['x-real-ip'] ?? 'unknown';
-}
-
-describe('getClientIP (logic)', () => {
-  it('returns the first IP from x-forwarded-for header', () => {
-    expect(extractClientIP({ 'x-forwarded-for': '1.2.3.4, 5.6.7.8' })).toBe('1.2.3.4');
-  });
-
-  it('trims whitespace from x-forwarded-for', () => {
-    expect(extractClientIP({ 'x-forwarded-for': '  10.0.0.1  , 10.0.0.2' })).toBe('10.0.0.1');
-  });
-
-  it('falls back to x-real-ip when x-forwarded-for is absent', () => {
-    expect(extractClientIP({ 'x-real-ip': '9.9.9.9' })).toBe('9.9.9.9');
-  });
-
-  it('returns "unknown" when no IP headers are present', () => {
-    expect(extractClientIP({})).toBe('unknown');
+describe('getClientIP', () => {
+  it('always returns 127.0.0.1 (localhost-only tool)', () => {
+    // getClientIP was simplified to always return loopback — no header trust
+    expect(getClientIP()).toBe('127.0.0.1');
   });
 });
 
@@ -82,7 +54,6 @@ describe('checkRateLimit', () => {
   it('retryAfterMs decreases as the window progresses', () => {
     const ip = freshIP();
     for (let i = 0; i < 10; i++) checkRateLimit(ip);
-    // First block check
     const r1 = checkRateLimit(ip);
     expect(r1.allowed).toBe(false);
     const retry1 = !r1.allowed ? r1.retryAfterMs : Infinity;
@@ -100,7 +71,6 @@ describe('checkRateLimit', () => {
     const ip1 = freshIP();
     const ip2 = freshIP();
     for (let i = 0; i < 10; i++) checkRateLimit(ip1);
-    // ip1 is exhausted, ip2 should still be allowed
     expect(checkRateLimit(ip2)).toEqual({ allowed: true });
     expect(checkRateLimit(ip1).allowed).toBe(false);
   });
