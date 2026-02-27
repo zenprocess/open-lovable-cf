@@ -87,15 +87,24 @@ function analyzeUserPreferences(messages: ConversationMessage[]): {
 declare global {
   var sandboxState: SandboxState;
   var conversationState: ConversationState | null;
+  var projectPreloaded: boolean;
+  var projectInstructions: { text: string; autoDetected: boolean } | null;
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, model = 'openai/gpt-oss-20b', context, isEdit = false } = await request.json();
-    
+    const { prompt, model = 'openai/gpt-oss-20b', context, isEdit: isEditFromClient = false } = await request.json();
+
+    // Force edit mode if a project was preloaded via /api/load-project,
+    // even if the frontend's conversationContext.appliedCode is empty.
+    // This prevents the AI from treating preloaded files as "new project".
+    const hasPreloadedFiles = !!global.projectPreloaded;
+    const hasExistingFiles = global.existingFiles && global.existingFiles.size > 0;
+    const isEdit = isEditFromClient || hasPreloadedFiles || hasExistingFiles;
+
     console.log('[generate-ai-code-stream] Received request:');
     console.log('[generate-ai-code-stream] - prompt:', prompt);
-    console.log('[generate-ai-code-stream] - isEdit:', isEdit);
+    console.log('[generate-ai-code-stream] - isEdit:', isEdit, '(client:', isEditFromClient, 'preloaded:', hasPreloadedFiles, 'existingFiles:', hasExistingFiles, ')');
     console.log('[generate-ai-code-stream] - context.sandboxId:', context?.sandboxId);
     console.log('[generate-ai-code-stream] - context.currentFiles:', context?.currentFiles ? Object.keys(context.currentFiles) : 'none');
     console.log('[generate-ai-code-stream] - currentFiles count:', context?.currentFiles ? Object.keys(context.currentFiles).length : 0);
@@ -964,6 +973,11 @@ MORPH FAST APPLY MODE (EDIT-ONLY):
           
           if (context.structure) {
             contextParts.push(`Current file structure:\n${context.structure}`);
+          }
+
+          // Include preloaded instructions (auto-detected API spec or user-edited)
+          if (global.projectInstructions?.text) {
+            contextParts.push(`\n## Project Instructions\n${global.projectInstructions.text}`);
           }
           
           // Use backend file cache instead of frontend-provided files

@@ -4,6 +4,7 @@ import { parseMorphEdits, applyMorphEditToFile } from '@/lib/morph-fast-apply';
 import type { SandboxState } from '@/types/sandbox';
 import type { ConversationState } from '@/types/conversation';
 import { sandboxManager } from '@/lib/sandbox/sandbox-manager';
+import { syncFileToExternalFolder } from '@/lib/external-folder-sync';
 
 declare global {
   var conversationState: ConversationState | null;
@@ -636,6 +637,9 @@ export async function POST(request: NextRequest) {
 
             // Write the file using provider
             await providerInstance.writeFile(normalizedPath, fileContent);
+
+            // Mirror to external folder if configured
+            syncFileToExternalFolder(normalizedPath, fileContent);
 
             // Update file cache
             if (global.sandboxState?.fileCache) {

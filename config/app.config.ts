@@ -146,6 +146,14 @@ export const appConfig = {
     ],
   },
   
+  // External Folder Sync Configuration
+  // When EXTERNAL_FOLDER env var is set, sandbox file writes are mirrored to that local path.
+  // This enables real-time sync between the sandbox and a local project directory.
+  externalFolder: {
+    enabled: !!process.env.EXTERNAL_FOLDER,
+    path: process.env.EXTERNAL_FOLDER || null,
+  },
+
   // API Endpoints Configuration (for external services)
   api: {
     // Retry configuration

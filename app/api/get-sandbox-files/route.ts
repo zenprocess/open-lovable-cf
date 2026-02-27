@@ -36,7 +36,7 @@ export async function GET() {
     for (const filePath of fileList) {
       try {
         // Check file size first
-        const statResult = await global.activeSandboxProvider.runCommand(`stat -f %z ${filePath}`);
+        const statResult = await global.activeSandboxProvider.runCommand(`stat -c %s ${filePath} 2>/dev/null || stat -f %z ${filePath}`);
 
         if (statResult.exitCode === 0) {
           const fileSize = parseInt(statResult.stdout || '0');
@@ -145,6 +145,11 @@ export async function GET() {
       error: (error as Error).message
     }, { status: 500 });
   }
+}
+
+// POST alias so callers using POST (e.g. load-project manifest refresh) don't get 405
+export async function POST() {
+  return GET();
 }
 
 function extractRoutes(files: Record<string, FileInfo>): RouteInfo[] {

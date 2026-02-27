@@ -108,6 +108,9 @@ function AISandboxPage() {
   const [sandboxFiles, setSandboxFiles] = useState<Record<string, string>>({});
   const [hasInitialSubmission, setHasInitialSubmission] = useState<boolean>(false);
   const [fileStructure, setFileStructure] = useState<string>('');
+  const [projectInstructions, setProjectInstructions] = useState('');
+  const [instructionsExpanded, setInstructionsExpanded] = useState(false);
+  const [instructionsDirty, setInstructionsDirty] = useState(false);
   
   const [conversationContext, setConversationContext] = useState<{
     scrapedWebsites: Array<{ url: string; content: any; timestamp: Date }>;
@@ -304,7 +307,20 @@ function AISandboxPage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run only on mount
-  
+
+  // Fetch preloaded instructions (auto-detected API spec or user-edited)
+  useEffect(() => {
+    fetch('/api/project-instructions')
+      .then(r => r.json())
+      .then(data => {
+        if (data.text) {
+          setProjectInstructions(data.text);
+          setInstructionsExpanded(true);
+        }
+      })
+      .catch(() => {}); // Non-critical
+  }, []);
+
   useEffect(() => {
     // Handle Escape key for home screen
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -3849,6 +3865,48 @@ Focus on the key sections and content, making it clean and modern.`;
                     </div>
                   </motion.div>
                 )}
+              </div>
+            )}
+          </div>
+
+          {/* Preloaded Instructions — editable context for the AI */}
+          <div className="border-t border-border bg-background-base">
+            <button
+              onClick={() => setInstructionsExpanded(!instructionsExpanded)}
+              className="w-full px-4 py-2 flex items-center justify-between text-xs text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              <span className="flex items-center gap-1.5">
+                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={`transition-transform ${instructionsExpanded ? 'rotate-90' : ''}`}>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                Project Instructions
+                {projectInstructions && <span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block" />}
+              </span>
+              {instructionsDirty && <span className="text-orange-500 text-[10px]">unsaved</span>}
+            </button>
+            {instructionsExpanded && (
+              <div className="px-4 pb-3">
+                <textarea
+                  value={projectInstructions}
+                  onChange={(e) => {
+                    setProjectInstructions(e.target.value);
+                    setInstructionsDirty(true);
+                  }}
+                  onBlur={() => {
+                    if (instructionsDirty) {
+                      fetch('/api/project-instructions', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: projectInstructions }),
+                      }).then(() => setInstructionsDirty(false)).catch(() => {});
+                    }
+                  }}
+                  placeholder="Add context for the AI (e.g., backend API endpoints, design conventions, constraints)..."
+                  className="w-full h-20 text-xs bg-gray-50 border border-gray-200 rounded-md p-2 resize-y focus:outline-none focus:ring-1 focus:ring-blue-300 placeholder:text-gray-400"
+                />
+                <p className="text-[10px] text-gray-400 mt-1">
+                  {projectInstructions ? 'These instructions are included in every AI prompt.' : 'Empty — auto-populated when a project with backend workers is loaded.'}
+                </p>
               </div>
             )}
           </div>
