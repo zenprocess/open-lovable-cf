@@ -58,22 +58,40 @@ export function useProjectState(): UseProjectStateReturn {
   });
 
   // Fetch preloaded instructions and project status
+  // Retries briefly because start-ui-dev.sh preloads files in the background
+  // and the load may not have completed by the time the page mounts.
   useEffect(() => {
-    fetch('/api/project-instructions')
-      .then(r => r.json())
-      .then(data => {
-        if (data.text) {
-          setProjectInstructions(data.text);
-          setInstructionsExpanded(true);
-        }
-        if (data.hasProject) {
-          setHasPreloadedProject(true);
-        }
-        setProjectLoading(false);
-      })
-      .catch(() => {
-        setProjectLoading(false);
-      });
+    let cancelled = false;
+    let retries = 0;
+    const maxRetries = 5;
+
+    const fetchInstructions = () => {
+      fetch('/api/project-instructions')
+        .then(r => r.json())
+        .then(data => {
+          if (cancelled) return;
+          if (data.text) {
+            setProjectInstructions(data.text);
+            setInstructionsExpanded(true);
+          }
+          if (data.hasProject) {
+            setHasPreloadedProject(true);
+            setProjectLoading(false);
+          } else if (retries < maxRetries) {
+            // Background preload may still be in progress — retry
+            retries++;
+            setTimeout(fetchInstructions, 2000);
+          } else {
+            setProjectLoading(false);
+          }
+        })
+        .catch(() => {
+          if (!cancelled) setProjectLoading(false);
+        });
+    };
+
+    fetchInstructions();
+    return () => { cancelled = true; };
   }, []);
 
   // Escape key closes home screen
