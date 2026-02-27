@@ -240,6 +240,7 @@ export default function HomePage() {
                   className="contents"
                   href="https://github.com/mendableai/open-lovable"
                   target="_blank"
+                  data-testid="home-github-link"
                 >
                   <ButtonUI variant="tertiary">
                     <GithubIcon />
@@ -268,6 +269,7 @@ export default function HomePage() {
               <Link
                 className="bg-black-alpha-4 hover:bg-black-alpha-6 rounded-6 px-8 lg:px-6 text-label-large h-30 lg:h-24 block mt-8 mx-auto w-max gap-4 transition-all"
                 href="#"
+                data-testid="home-powered-by-firecrawl-link"
                 onClick={(e) => e.preventDefault()}
               >
                 Powered by Firecrawl.
@@ -332,6 +334,7 @@ export default function HomePage() {
                             setUrl('');
                           }, 500);
                         }}
+                        data-testid="home-search-again-btn"
                         className="button relative rounded-10 px-12 py-8 text-label-medium font-medium flex items-center justify-center gap-6 bg-gray-100 hover:bg-gray-200 text-gray-700 active:scale-[0.995] transition-all"
                       >
                         <svg 
@@ -380,6 +383,7 @@ export default function HomePage() {
                         className="flex-1 bg-transparent text-body-input text-accent-black placeholder:text-black-alpha-48 focus:outline-none focus:ring-0 focus:border-transparent"
                         placeholder="Enter URL or search term..."
                         type="text"
+                        data-testid="home-url-input"
                         value={url}
                         disabled={isSearching}
                         onChange={(e) => {
@@ -446,6 +450,7 @@ export default function HomePage() {
                             <button
                               className="transition-all relative rounded-full group bg-black-alpha-10"
                               type="button"
+                              data-testid="home-extend-brand-toggle-btn"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setExtendBrandStyles(!extendBrandStyles);
@@ -481,6 +486,7 @@ export default function HomePage() {
                             value={additionalInstructions}
                             onChange={(e) => setAdditionalInstructions(e.target.value)}
                             placeholder="Describe the new functionality you want to build using this brand's styles..."
+                            data-testid="home-brand-instructions-textarea"
                             className="w-full px-4 py-10 text-xs font-medium text-gray-700 bg-gray-50 rounded border border-gray-200 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 placeholder:text-gray-400 min-h-[80px] resize-none"
                           />
                         </div>
@@ -495,6 +501,7 @@ export default function HomePage() {
                             {styles.map((style, index) => (
                               <button
                                 key={style.id}
+                                data-testid={`home-style-${style.id}-btn`}
                                 onClick={() => setSelectedStyle(style.id)}
                                 className={`
                                   ${selectedStyle === style.id
@@ -529,6 +536,7 @@ export default function HomePage() {
                         <select
                           value={selectedModel}
                           onChange={(e) => setSelectedModel(e.target.value)}
+                          data-testid="home-model-select"
                           className={`px-3 py-2.5 text-xs font-medium text-gray-700 bg-white rounded border border-gray-200 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 ${extendBrandStyles ? 'flex-1' : ''}`}
                         >
                           {models.map((model) => (
@@ -542,6 +550,7 @@ export default function HomePage() {
                         {!extendBrandStyles && (
                           <input
                             type="text"
+                            data-testid="home-additional-instructions-input"
                             className="flex-1 px-3 py-2.5 text-xs font-medium text-gray-700 bg-gray-50 rounded border border-gray-200 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 placeholder:text-gray-400"
                             placeholder="Additional instructions (optional)"
                             onChange={(e) => sessionStorage.setItem('additionalInstructions', e.target.value)}
@@ -655,6 +664,7 @@ export default function HomePage() {
                                   value={additionalInstructions}
                                   onChange={(e) => setAdditionalInstructions(e.target.value)}
                                   placeholder="Describe your customizations..."
+                                  data-testid="home-carousel-instructions-textarea"
                                   className="flex-1 bg-transparent text-body-input text-accent-black placeholder:text-black-alpha-48 focus:outline-none focus:ring-0 focus:border-transparent resize-none min-h-[60px]"
                                   autoFocus
                                   onClick={(e) => e.stopPropagation()}
@@ -679,6 +689,7 @@ export default function HomePage() {
                                     setShowInstructionsForIndex(null);
                                     setAdditionalInstructions('');
                                   }}
+                                  data-testid="home-carousel-cancel-btn"
                                   className="button relative rounded-10 px-8 py-8 text-label-medium font-medium flex items-center justify-center bg-black-alpha-4 hover:bg-black-alpha-6 text-black-alpha-48 active:scale-[0.995] transition-all"
                                 >
                                   <svg 
@@ -693,6 +704,7 @@ export default function HomePage() {
                                 </button>
                                 
                                 <button
+                                  data-testid="home-apply-clone-btn"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     if (additionalInstructions.trim()) {
@@ -741,6 +753,7 @@ export default function HomePage() {
                                   e.stopPropagation();
                                   handleSubmit(result);
                                 }}
+                                data-testid="home-instant-clone-btn"
                                 className="bg-orange-500 hover:bg-orange-600 flex items-center justify-center button relative text-label-medium button-primary group/button rounded-10 p-8 gap-2 text-white active:scale-[0.995]"
                               >
                                 <div className="button-background absolute inset-0 rounded-10 pointer-events-none" />
@@ -764,6 +777,7 @@ export default function HomePage() {
                                   setShowInstructionsForIndex(index);
                                   setAdditionalInstructions('');
                                 }}
+                                data-testid="home-add-instructions-btn"
                                 className="bg-gray-100 hover:bg-gray-200 flex items-center justify-center button relative text-label-medium rounded-10 p-8 gap-2 text-gray-700 active:scale-[0.995]"
                               >
                                 <svg 

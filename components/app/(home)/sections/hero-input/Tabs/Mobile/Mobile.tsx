@@ -37,6 +37,7 @@ export default function HeroInputTabsMobile(props: {
   return (
     <>
       <button
+        data-testid="hero-tabs-mobile-trigger"
         className="py-8 px-10 flex items-center rounded-10 inside-border before:border-black-alpha-4 relative lg:hidden gap-4"
         ref={ref}
         onClick={() => setIsOpen(!isOpen)}

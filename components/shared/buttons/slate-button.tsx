@@ -57,6 +57,7 @@ export const SlateButton = React.forwardRef<
 
     return (
       <button
+        data-testid="slate-button"
         ref={ref}
         className={cn(
           // Base styles

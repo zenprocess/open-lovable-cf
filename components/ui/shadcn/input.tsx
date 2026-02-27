@@ -7,6 +7,7 @@ const Input = forwardRef<
 >(({ className, ...props }, ref) => {
   return (
     <label
+      data-testid="shadcn-input-label"
       className={cn(
         "py-8 px-12 rounded-8 transition-all w-full block gap-4 cursor-text",
         "relative bg-accent-white",
@@ -16,6 +17,7 @@ const Input = forwardRef<
       )}
     >
       <input
+        data-testid="shadcn-input"
         ref={ref}
         className="outline-none w-full resize-none bg-transparent"
         {...props}

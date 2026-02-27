@@ -4,7 +4,7 @@ import { SandboxFactory } from '@/lib/sandbox/factory';
 
 // Store active sandbox globally
 declare global {
-  var activeSandbox: any;
+  var activeSandboxProvider: any;
   var sandboxData: any;
   var existingFiles: Set<string>;
   var sandboxState: SandboxState;
@@ -27,7 +27,7 @@ export async function POST() {
   }
 
   // Check if we already have an active sandbox
-  if (global.activeSandbox && global.sandboxData) {
+  if (global.activeSandboxProvider && global.sandboxData) {
     console.log('[create-ai-sandbox] Returning existing active sandbox');
     return NextResponse.json({
       success: true,
@@ -67,14 +67,14 @@ async function createSandboxInternal() {
     console.log('[create-ai-sandbox] Creating E2B sandbox...');
 
     // Kill existing sandbox if any
-    if (global.activeSandbox) {
+    if (global.activeSandboxProvider) {
       console.log('[create-ai-sandbox] Stopping existing sandbox...');
       try {
-        await global.activeSandbox.terminate();
+        await global.activeSandboxProvider.terminate();
       } catch (e) {
         console.error('Failed to stop existing sandbox:', e);
       }
-      global.activeSandbox = null;
+      global.activeSandboxProvider = null;
       global.sandboxData = null;
     }
 
@@ -96,7 +96,7 @@ async function createSandboxInternal() {
     console.log('[create-ai-sandbox] Sandbox ready at:', sandboxUrl);
 
     // Store sandbox globally
-    global.activeSandbox = provider;
+    global.activeSandboxProvider = provider;
     global.sandboxData = {
       sandboxId,
       url: sandboxUrl
@@ -154,7 +154,7 @@ async function createSandboxInternal() {
     }
 
     // Clear global state on error
-    global.activeSandbox = null;
+    global.activeSandboxProvider = null;
     global.sandboxData = null;
 
     throw error; // Throw to be caught by the outer handler

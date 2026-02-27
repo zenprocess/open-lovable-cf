@@ -34,14 +34,14 @@ export function FireActionLink({
 
   if (onClick) {
     return (
-      <button onClick={onClick} className={baseClasses}>
+      <button data-testid="fire-action-button" onClick={onClick} className={baseClasses}>
         {label}
       </button>
     );
   }
 
   return (
-    <Link href={href || "#"} className={baseClasses}>
+    <Link data-testid="fire-action-link" href={href || "#"} className={baseClasses}>
       {label}
     </Link>
   );

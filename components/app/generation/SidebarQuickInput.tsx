@@ -24,6 +24,7 @@ export default function SidebarQuickInput({ onSubmit, disabled = false }: Sideba
       <div className="bg-gray-50 rounded-lg border border-gray-200">
         <div className="p-3 flex items-center gap-3">
           <input
+            data-testid="sidebar-quick-input-url"
             className="flex-1 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
             placeholder="Enter a new URL to regenerate..."
             type="text"

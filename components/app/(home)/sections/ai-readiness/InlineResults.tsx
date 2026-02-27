@@ -326,12 +326,13 @@ export default function InlineResults({
             className="flex gap-8"
           >
             <button
+              data-testid="inline-results-reset"
               onClick={onReset}
               className="flex-1 px-16 py-10 bg-black-alpha-4 hover:bg-black-alpha-6 rounded-8 text-label-medium transition-all"
             >
               Try Another
             </button>
-            <button className="flex-1 px-16 py-10 bg-heat-100 hover:bg-heat-200 text-white rounded-8 text-label-medium transition-all shadow-lg hover:shadow-xl">
+            <button data-testid="inline-results-view-details" className="flex-1 px-16 py-10 bg-heat-100 hover:bg-heat-200 text-white rounded-8 text-label-medium transition-all shadow-lg hover:shadow-xl">
               View Details
             </button>
           </motion.div>

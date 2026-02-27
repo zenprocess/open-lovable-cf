@@ -378,6 +378,7 @@ export default function ControlPanel({
               className="mt-24 mb-20 flex justify-center gap-4"
             >
               <button
+                data-testid="control-panel-view-grid"
                 onClick={() => setViewMode('grid')}
                 className={`px-16 py-8 rounded-8 text-label-medium font-medium transition-all ${
                   viewMode === 'grid' 
@@ -388,6 +389,7 @@ export default function ControlPanel({
                 Grid View
               </button>
               <button
+                data-testid="control-panel-view-chart"
                 onClick={() => setViewMode('chart')}
                 className={`px-16 py-8 rounded-8 text-label-medium font-medium transition-all ${
                   viewMode === 'chart' 
@@ -398,6 +400,7 @@ export default function ControlPanel({
                 Radar Chart
               </button>
               <button
+                data-testid="control-panel-view-bars"
                 onClick={() => setViewMode('bars')}
                 className={`px-16 py-8 rounded-8 text-label-medium font-medium transition-all ${
                   viewMode === 'bars' 
@@ -682,13 +685,15 @@ export default function ControlPanel({
           className="flex gap-12 justify-center"
         >
           <button
+            data-testid="control-panel-reset"
             onClick={onReset}
             className="px-20 py-10 bg-accent-white border border-black-alpha-8 hover:bg-black-alpha-4 rounded-8 text-label-medium transition-all"
           >
             Analyze Another Site
           </button>
           {true && ( 
-            <button 
+            <button
+              data-testid="control-panel-analyze-ai"
               onClick={async () => {
               setIsAnalyzingAI(true);
               setShowAIAnalysis(true);

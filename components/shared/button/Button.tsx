@@ -18,6 +18,7 @@ export default function Button({
 
   return (
     <button
+      data-testid="button"
       {...attrs}
       type={attrs.type ?? "button"}
       className={cn(

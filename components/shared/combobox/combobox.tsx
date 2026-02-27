@@ -42,6 +42,7 @@ export default function Combobox({
   return (
     <div className={cn("w-full", className)} ref={ref}>
       <button
+        data-testid="combobox-trigger"
         className={cn(
           "relative bg-accent-white flex w-full gap-4 rounded-8 p-6 pl-10",
           "inside-border before:border-black-alpha-8 hover:before:border-black-alpha-12 hover:bg-black-alpha-2",
@@ -131,6 +132,7 @@ const Items = ({
 
       {options.map((option) => (
         <button
+          data-testid={`combobox-option-${option.value}`}
           className="w-full group py-6 px-10 text-label-small"
           key={option.value}
           type="button"

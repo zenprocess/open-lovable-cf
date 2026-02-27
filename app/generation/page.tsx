@@ -1307,6 +1307,7 @@ Tip: I automatically detect and install npm packages from your code imports (lik
                         </div>
                         <button
                           onClick={() => setSelectedFile(null)}
+                          data-testid="generation-close-file-btn"
                           className="hover:bg-black/20 p-1 rounded transition-colors"
                         >
                           <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1681,6 +1682,7 @@ Tip: I automatically detect and install npm packages from your code imports (lik
                   iframeRef.current.src = newSrc;
                 }
               }}
+              data-testid="generation-refresh-sandbox-btn"
               className="absolute bottom-4 right-4 bg-white/90 hover:bg-white text-gray-700 p-2 rounded-lg shadow-lg transition-all duration-200 hover:scale-105"
               title="Refresh sandbox"
             >
@@ -3287,6 +3289,7 @@ Focus on the key sections and content, making it clean and modern.`;
           {/* Model Selector - Left side */}
           <select
             value={aiModel}
+            data-testid="generation-model-select"
             onChange={(e) => {
               const newModel = e.target.value;
               setAiModel(newModel);
@@ -3305,8 +3308,9 @@ Focus on the key sections and content, making it clean and modern.`;
               </option>
             ))}
           </select>
-          <button 
+          <button
             onClick={() => createSandbox()}
+            data-testid="generation-new-sandbox-btn"
             className="p-8 rounded-lg transition-colors bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100"
             title="Create new sandbox"
           >
@@ -3314,8 +3318,9 @@ Focus on the key sections and content, making it clean and modern.`;
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
           </button>
-          <button 
+          <button
             onClick={reapplyLastGeneration}
+            data-testid="generation-reapply-btn"
             className="p-8 rounded-lg transition-colors bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
             title="Re-apply last generation"
             disabled={!conversationContext.lastGeneratedCode || !sandboxData}
@@ -3324,9 +3329,10 @@ Focus on the key sections and content, making it clean and modern.`;
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           </button>
-          <button 
+          <button
             onClick={downloadZip}
             disabled={!sandboxData}
+            data-testid="generation-download-zip-btn"
             className="p-8 rounded-lg transition-colors bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
             title="Download your Vite app as ZIP"
           >
@@ -3392,10 +3398,11 @@ Focus on the key sections and content, making it clean and modern.`;
                             e.currentTarget.src = `https://www.google.com/s2/favicons?domain=${new URL(sourceURL).hostname}&sz=128`;
                           }}
                         />
-                        <a 
-                          href={sourceURL} 
-                          target="_blank" 
+                        <a
+                          href={sourceURL}
+                          target="_blank"
                           rel="noopener noreferrer"
+                          data-testid="generation-source-url-link"
                           className="text-black hover:text-gray-700 truncate max-w-[250px] font-medium"
                           title={sourceURL}
                         >
@@ -3410,6 +3417,7 @@ Focus on the key sections and content, making it clean and modern.`;
                             <span className="text-xs font-medium text-gray-600">Screenshot Preview</span>
                             <button
                               onClick={() => setScreenshotCollapsed(!screenshotCollapsed)}
+                              data-testid="generation-screenshot-collapse-btn"
                               className="text-gray-500 hover:text-gray-700 transition-colors p-1"
                               aria-label={screenshotCollapsed ? 'Expand screenshot' : 'Collapse screenshot'}
                             >
@@ -3864,8 +3872,9 @@ Focus on the key sections and content, making it clean and modern.`;
               <div className="inline-flex bg-gray-100 border border-gray-200 rounded-md p-0.5">
                 <button
                   onClick={() => setActiveTab('generation')}
+                  data-testid="generation-tab-code-btn"
                   className={`px-3 py-1 rounded transition-all text-xs font-medium ${
-                    activeTab === 'generation' 
+                    activeTab === 'generation'
                       ? 'bg-white text-gray-900 shadow-sm' 
                       : 'bg-transparent text-gray-600 hover:text-gray-900'
                   }`}
@@ -3879,8 +3888,9 @@ Focus on the key sections and content, making it clean and modern.`;
                 </button>
                 <button
                   onClick={() => setActiveTab('preview')}
+                  data-testid="generation-tab-preview-btn"
                   className={`px-3 py-1 rounded transition-all text-xs font-medium ${
-                    activeTab === 'preview' 
+                    activeTab === 'preview'
                       ? 'bg-white text-gray-900 shadow-sm' 
                       : 'bg-transparent text-gray-600 hover:text-gray-900'
                   }`}
@@ -3921,11 +3931,12 @@ Focus on the key sections and content, making it clean and modern.`;
               
               {/* Open in new tab button */}
               {sandboxData && (
-                <a 
-                  href={sandboxData.url} 
-                  target="_blank" 
+                <a
+                  href={sandboxData.url}
+                  target="_blank"
                   rel="noopener noreferrer"
                   title="Open in new tab"
+                  data-testid="generation-open-sandbox-link"
                   className="p-1.5 rounded-md transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 >
                   <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">

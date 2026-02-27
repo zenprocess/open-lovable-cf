@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Get the active sandbox or provider
-    const sandbox = global.activeSandbox || global.activeSandboxProvider;
+    const sandbox = global.activeSandboxProvider;
     
     // If no active sandbox, just return parsed results
     if (!sandbox) {

@@ -156,6 +156,7 @@ export function JsonErrorHighlighter({
       </div>
       {/* Textarea */}
       <textarea
+        data-testid="json-error-highlighter-textarea"
         ref={textareaRef}
         className={cn(
           "absolute inset-0 resize-none bg-transparent border rounded-md text-black dark:text-white focus:overline-none focus:border-zinc-200 focus-visible:border-zinc-200 focus-visible:outline-none",

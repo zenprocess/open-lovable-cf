@@ -1,21 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 declare global {
-  var activeSandbox: any;
+  var activeSandboxProvider: any;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const { files } = await request.json();
-    
+
     if (!files || typeof files !== 'object') {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Files object is required' 
+      return NextResponse.json({
+        success: false,
+        error: 'Files object is required'
       }, { status: 400 });
     }
 
-    if (!global.activeSandbox) {
+    if (!global.activeSandboxProvider) {
       return NextResponse.json({
         success: false,
         error: 'No active sandbox'
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     for (const [filePath, content] of Object.entries(files)) {
       if (typeof content !== 'string') continue;
-      
+
       // Skip non-JS/JSX/TS/TSX files
       if (!filePath.match(/\.(jsx?|tsx?)$/)) continue;
 
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[detect-and-install-packages] Found imports:', Array.from(imports));
-    
+
     // Log specific heroicons imports
     const heroiconImports = Array.from(imports).filter(imp => imp.includes('heroicons'));
     if (heroiconImports.length > 0) {
@@ -59,11 +59,11 @@ export async function POST(request: NextRequest) {
     const packages = Array.from(imports).filter(imp => {
       // Skip relative imports
       if (imp.startsWith('.') || imp.startsWith('/')) return false;
-      
+
       // Skip built-in Node modules
       const builtins = ['fs', 'path', 'http', 'https', 'crypto', 'stream', 'util', 'os', 'url', 'querystring', 'child_process'];
       if (builtins.includes(imp)) return false;
-      
+
       return true;
     });
 
@@ -95,14 +95,11 @@ export async function POST(request: NextRequest) {
     // Check which packages are already installed
     const installed: string[] = [];
     const missing: string[] = [];
-    
+
     for (const packageName of uniquePackages) {
       try {
-        const checkResult = await global.activeSandbox.runCommand({
-          cmd: 'test',
-          args: ['-d', `node_modules/${packageName}`]
-        });
-        
+        const checkResult = await global.activeSandboxProvider.runCommand(`test -d node_modules/${packageName}`);
+
         if (checkResult.exitCode === 0) {
           installed.push(packageName);
         } else {
@@ -128,15 +125,14 @@ export async function POST(request: NextRequest) {
 
     // Install missing packages
     console.log('[detect-and-install-packages] Installing packages:', missing);
-    
-    const installResult = await global.activeSandbox.runCommand({
-      cmd: 'npm',
-      args: ['install', '--save', ...missing]
-    });
 
-    const stdout = await installResult.stdout();
-    const stderr = await installResult.stderr();
-    
+    const installResult = await global.activeSandboxProvider.runCommand(
+      `npm install --save ${missing.join(' ')}`
+    );
+
+    const stdout = installResult.stdout || '';
+    const stderr = installResult.stderr || '';
+
     console.log('[detect-and-install-packages] Install stdout:', stdout);
     if (stderr) {
       console.log('[detect-and-install-packages] Install stderr:', stderr);
@@ -148,21 +144,18 @@ export async function POST(request: NextRequest) {
 
     for (const packageName of missing) {
       try {
-        const verifyResult = await global.activeSandbox.runCommand({
-          cmd: 'test',
-          args: ['-d', `node_modules/${packageName}`]
-        });
-        
+        const verifyResult = await global.activeSandboxProvider.runCommand(`test -d node_modules/${packageName}`);
+
         if (verifyResult.exitCode === 0) {
           finalInstalled.push(packageName);
-          console.log(`✓ Verified installation of ${packageName}`);
+          console.log(`Verified installation of ${packageName}`);
         } else {
           failed.push(packageName);
-          console.log(`✗ Failed to verify installation of ${packageName}`);
+          console.log(`Failed to verify installation of ${packageName}`);
         }
       } catch (error) {
         failed.push(packageName);
-        console.log(`✗ Error verifying ${packageName}:`, error);
+        console.log(`Error verifying ${packageName}:`, error);
       }
     }
 

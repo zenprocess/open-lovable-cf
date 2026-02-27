@@ -57,7 +57,7 @@ export default function SidebarInput({ onSubmit, disabled = false }: SidebarInpu
         <div className="p-4 border-b border-gray-100">
          {/* link to home page with button */}
          <Link href="/">
-          <button className="w-full px-3 py-2 text-xs font-medium text-gray-700 bg-white rounded border border-gray-200 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500">
+          <button data-testid="sidebar-input-new-website" className="w-full px-3 py-2 text-xs font-medium text-gray-700 bg-white rounded border border-gray-200 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500">
             Generate a new website
           </button>
          </Link>
@@ -94,6 +94,7 @@ export default function SidebarInput({ onSubmit, disabled = false }: SidebarInpu
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-2">AI Model</label>
               <select
+                data-testid="sidebar-input-model-select"
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}
                 disabled={disabled}
@@ -111,6 +112,7 @@ export default function SidebarInput({ onSubmit, disabled = false }: SidebarInpu
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-2">Additional Instructions (optional)</label>
               <input
+                data-testid="sidebar-input-instructions"
                 type="text"
                 value={additionalInstructions}
                 onChange={(e) => setAdditionalInstructions(e.target.value)}
@@ -123,6 +125,7 @@ export default function SidebarInput({ onSubmit, disabled = false }: SidebarInpu
             {/* Submit Button */}
             <div className="pt-2">
               <button
+                data-testid="sidebar-input-submit"
                 onClick={handleSubmit}
                 disabled={!isValidUrl || disabled}
                 className={`

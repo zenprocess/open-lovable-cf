@@ -16,6 +16,7 @@ export default function Toggle({
 
   return (
     <button
+      data-testid="shadcn-toggle"
       className={cn(
         "transition-all relative rounded-full group",
         checked ? "bg-heat-100" : "bg-black-alpha-10",

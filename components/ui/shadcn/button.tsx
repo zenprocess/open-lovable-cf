@@ -34,6 +34,7 @@ const Button = forwardRef<HTMLButtonElement, Props>(
 
     return (
       <button
+        data-testid="shadcn-button"
         {...attrs}
         ref={ref}
         type={attrs.type ?? "button"}
