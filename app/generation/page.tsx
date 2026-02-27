@@ -3876,14 +3876,14 @@ Focus on the key sections and content, making it clean and modern.`;
             )}
           </div>
 
-          {/* Loading indicator for project preload */}
-          {projectLoading && (
+          {/* Loading indicator for sandbox + project preload */}
+          {(!sandboxData || projectLoading) && (
             <div className="border-t border-border bg-background-base px-4 py-2 flex items-center gap-2 text-xs text-gray-500">
               <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
-              Loading project files...
+              {!sandboxData ? 'Creating sandbox...' : 'Loading project files...'}
             </div>
           )}
 
@@ -3900,22 +3900,27 @@ Focus on the key sections and content, making it clean and modern.`;
                 Project Instructions
                 {projectInstructions && <span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block" />}
               </span>
-              {instructionsDirty && <span className="text-orange-500 text-[10px]">unsaved</span>}
+              <span className="flex items-center gap-2">
+                {instructionsDirty && <span className="text-orange-500 text-[10px]">unsaved</span>}
+                <span className="text-[10px] text-gray-400">{projectInstructions.length}/10,000</span>
+              </span>
             </button>
             {instructionsExpanded && (
               <div className="px-4 pb-3">
                 <textarea
                   value={projectInstructions}
                   onChange={(e) => {
-                    setProjectInstructions(e.target.value);
-                    setInstructionsDirty(true);
+                    if (e.target.value.length <= 10000) {
+                      setProjectInstructions(e.target.value);
+                      setInstructionsDirty(true);
+                    }
                   }}
-                  placeholder="Add context for the AI (e.g., backend API endpoints, design conventions, constraints)..."
-                  className="w-full h-20 text-xs bg-gray-50 border border-gray-200 rounded-md p-2 resize-y focus:outline-none focus:ring-1 focus:ring-blue-300 placeholder:text-gray-400"
+                  placeholder={"Example:\n- Backend API at /api/v1/* (REST, JSON)\n- Use Tailwind only, no inline styles\n- Color palette: blue-600 primary, gray-100 bg\n- Mobile-first responsive design\n- All buttons must have hover states"}
+                  className="w-full h-24 text-xs bg-gray-50 border border-gray-200 rounded-md p-2 resize-y focus:outline-none focus:ring-1 focus:ring-blue-300 placeholder:text-gray-400"
                 />
                 <div className="flex items-center justify-between mt-1">
                   <p className="text-[10px] text-gray-400">
-                    {projectInstructions ? 'These instructions are included in every AI prompt.' : 'Empty — auto-populated when a project with backend workers is loaded.'}
+                    {projectInstructions ? 'Included in every AI prompt.' : 'Add constraints, API specs, or design rules. Auto-populated when workers are detected.'}
                   </p>
                   {instructionsDirty && (
                     <button
