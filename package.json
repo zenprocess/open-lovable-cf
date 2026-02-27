@@ -13,7 +13,9 @@
     "test:e2e": "playwright test",
     "test:api": "node tests/api-endpoints.test.js",
     "test:code": "node tests/code-execution.test.js",
-    "test:all": "npm run test:api && npm run test:code"
+    "test:all": "npm run test:api && npm run test:code",
+    "pages:build": "npx @cloudflare/next-on-pages",
+    "pages:dev": "npx wrangler pages dev .vercel/output/static --compatibility-date=2025-01-01"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.1",

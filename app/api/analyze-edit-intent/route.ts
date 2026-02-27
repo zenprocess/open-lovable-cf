@@ -5,6 +5,7 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateObject } from 'ai';
 import { z } from 'zod';
+import { checkRequiredEnvVars, resolveRequiredAIKey } from '@/lib/api/env-check';
 // import type { FileManifest } from '@/types/file-manifest'; // Type is used implicitly through manifest parameter
 
 // Check if we're using Vercel AI Gateway
@@ -72,6 +73,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         error: 'prompt and manifest are required'
       }, { status: 400 });
+    }
+
+    // --- Env var guard: check the required AI provider key for this model ---
+    const requiredAIKey = resolveRequiredAIKey(model);
+    if (requiredAIKey) {
+      const envError = checkRequiredEnvVars([requiredAIKey]);
+      if (envError) return envError;
     }
     
     // Create a summary of available files for the AI

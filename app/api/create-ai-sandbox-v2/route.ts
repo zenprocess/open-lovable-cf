@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { SandboxFactory } from '@/lib/sandbox/factory';
+import { checkRequiredEnvVars } from '@/lib/api/env-check';
 // SandboxProvider type is used through SandboxFactory
 import type { SandboxState } from '@/types/sandbox';
 import { sandboxManager } from '@/lib/sandbox/sandbox-manager';
@@ -13,6 +14,10 @@ declare global {
 }
 
 export async function POST() {
+  // --- Env var guard ---
+  const envError = checkRequiredEnvVars(['E2B_API_KEY']);
+  if (envError) return envError;
+
   try {
     console.log('[create-ai-sandbox-v2] Creating sandbox...');
     

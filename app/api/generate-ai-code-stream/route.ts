@@ -5,6 +5,7 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { streamText } from 'ai';
 import type { SandboxState } from '@/types/sandbox';
+import { checkRequiredEnvVars, resolveRequiredAIKey } from '@/lib/api/env-check';
 import { selectFilesForEdit, getFileContents, formatFilesForAI } from '@/lib/context-selector';
 import { executeSearchPlan, formatSearchResultsForAI, selectTargetFile } from '@/lib/file-search-executor';
 import { FileManifest } from '@/types/file-manifest';
@@ -147,10 +148,17 @@ export async function POST(request: NextRequest) {
     }
     
     if (!prompt) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Prompt is required' 
+      return NextResponse.json({
+        success: false,
+        error: 'Prompt is required'
       }, { status: 400 });
+    }
+
+    // --- Env var guard: check the required AI provider key for this model ---
+    const requiredAIKey = resolveRequiredAIKey(model);
+    if (requiredAIKey) {
+      const envError = checkRequiredEnvVars([requiredAIKey]);
+      if (envError) return envError;
     }
     
     // Create a stream for real-time updates
@@ -325,7 +333,7 @@ User request: "${prompt}"`;
             console.log('[generate-ai-code-stream] WARNING: No manifest available for edit mode!');
             
             // Try to fetch files from sandbox if we have one
-            if (global.activeSandbox) {
+            if (global.activeSandboxProvider) {
               await sendProgress({ type: 'status', message: 'Fetching current files from sandbox...' });
               
               try {
@@ -969,7 +977,7 @@ MORPH FAST APPLY MODE (EDIT-ONLY):
           console.log('[generate-ai-code-stream] - Has manifest:', !!global.sandboxState?.fileCache?.manifest);
           
           // If no backend files and we're in edit mode, try to fetch from sandbox
-          if (!hasBackendFiles && isEdit && (global.activeSandbox || context?.sandboxId)) {
+          if (!hasBackendFiles && isEdit && (global.activeSandboxProvider || context?.sandboxId)) {
             console.log('[generate-ai-code-stream] No backend files, attempting to fetch from sandbox...');
             
             try {

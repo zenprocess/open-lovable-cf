@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { SandboxState } from '@/types/sandbox';
 import { SandboxFactory } from '@/lib/sandbox/factory';
+import { checkRequiredEnvVars } from '@/lib/api/env-check';
+import { checkRateLimit, getClientIP } from '@/lib/api/rate-limiter';
 
 // Store active sandbox globally
 declare global {
@@ -12,7 +14,21 @@ declare global {
   var sandboxCreationPromise: Promise<any> | null;
 }
 
-export async function POST() {
+export async function POST(request: Request) {
+  // --- Env var guard ---
+  const envError = checkRequiredEnvVars(['E2B_API_KEY']);
+  if (envError) return envError;
+
+  // --- Rate limiting (10 req/min per IP) ---
+  const ip = getClientIP(request);
+  const rateResult = checkRateLimit(ip);
+  if (!rateResult.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests', code: 'RATE_LIMITED', retryAfterMs: rateResult.retryAfterMs },
+      { status: 429 }
+    );
+  }
+
   // Check if sandbox creation is already in progress
   if (global.sandboxCreationInProgress && global.sandboxCreationPromise) {
     console.log('[create-ai-sandbox] Sandbox creation already in progress, waiting for existing creation...');
